@@ -10,7 +10,6 @@ export default tseslint.config(
   },
   eslint.configs.recommended,
   eslintPluginPrettierRecommended,
-  eslintPluginPrettierRecommended,
   {
     languageOptions: {
       globals: {
