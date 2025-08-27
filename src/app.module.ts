@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SchedulerHealth } from './scheduler/scheduler-health';
 
 import { MailModule } from './mail/mail.module';
 import { ConfigModule } from '@nestjs/config';
@@ -13,16 +15,9 @@ import { ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    // ThrottlerModule.forRoot({
-    //   throttlers: [
-    //     {
-    //       ttl: 300,
-    //       limit: 5,
-    //     },
-    //   ],
-    // }),
+  ScheduleModule.forRoot(),
   ],
   controllers: [],
-  providers: [],
+  providers: [SchedulerHealth],
 })
 export class AppModule {}
