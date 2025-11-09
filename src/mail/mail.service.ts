@@ -24,6 +24,12 @@ export class MailService {
         user: emailUser,
         pass: emailPassword,
       },
+      pool: true,
+      maxConnections: 5,
+      maxMessages: 100,
+      connectionTimeout: 60000, // 1 minuto
+      greetingTimeout: 30000, // 30 segundos
+      socketTimeout: 60000, // 1 minuto
     });
   }
 
@@ -52,12 +58,19 @@ export class MailService {
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
+      const info = await this.transporter.sendMail(mailOptions);
+      this.logger.log('Email sent successfully:', info.messageId);
       this.logger.log('END sendContactEmail');
       return {message:'Email sent successfully'};
     } catch (error) {
       this.logger.error('Error sending email:', error.message);
-      throw new Error('Error sending email');
+      this.logger.error('Error code:', error.code);
+      this.logger.error('Error response:', error.response);
+      
+      if (error.code === 'ETIMEDOUT' || error.code === 'ECONNECTION') {
+        throw new Error('Connection timeout - please try again later');
+      }
+      throw new Error(`Error sending email: ${error.message}`);
     }
   }
   
@@ -87,12 +100,19 @@ export class MailService {
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
+      const info = await this.transporter.sendMail(mailOptions);
+      this.logger.log('Quote request sent successfully:', info.messageId);
       this.logger.log('END requestQuote');
       return { message: 'Solicitud de cotización enviada correctamente' };
     } catch (error) {
       this.logger.error('Error enviando solicitud de cotización:', error.message);
-      throw new Error('Error enviando solicitud de cotización');
+      this.logger.error('Error code:', error.code);
+      this.logger.error('Error response:', error.response);
+      
+      if (error.code === 'ETIMEDOUT' || error.code === 'ECONNECTION') {
+        throw new Error('Connection timeout - please try again later');
+      }
+      throw new Error(`Error enviando solicitud de cotización: ${error.message}`);
     }
   }
 }
