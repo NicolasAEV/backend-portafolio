@@ -13,13 +13,19 @@ export class MailService {
     const emailUser = this.configService.get<string>('EMAIL_USER');
     const emailPassword = this.configService.get<string>('EMAIL_PASSWORD');
 
+    // Logs para verificar credenciales (REMOVER después de verificar)
+    this.logger.log(`EMAIL_USER: ${emailUser}`);
+    this.logger.log(`EMAIL_PASSWORD length: ${emailPassword?.length || 0}`);
+
     if (!emailUser || !emailPassword) {
       throw new Error(
         'Missing EMAIL_USER or EMAIL_PASSWORD in environment variables',
       );
     }
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com', // Especificar host explícitamente
+      port: 587, // Puerto TLS
+      secure: false, // true para 465, false para otros puertos
       auth: {
         user: emailUser,
         pass: emailPassword,
@@ -30,6 +36,18 @@ export class MailService {
       connectionTimeout: 60000, // 1 minuto
       greetingTimeout: 30000, // 30 segundos
       socketTimeout: 60000, // 1 minuto
+      tls: {
+        rejectUnauthorized: false, // Permitir certificados auto-firmados
+      },
+    });
+
+    // Verificar conexión al iniciar
+    this.transporter.verify((error, success) => {
+      if (error) {
+        this.logger.error('Error verificando conexión SMTP:', error);
+      } else {
+        this.logger.log('Servidor SMTP listo para enviar correos');
+      }
     });
   }
 
