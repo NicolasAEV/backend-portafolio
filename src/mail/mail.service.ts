@@ -23,32 +23,22 @@ export class MailService {
       );
     }
     this.transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com', // Especificar host explícitamente
-      port: 587, // Puerto TLS
-      secure: false, // true para 465, false para otros puertos
+      host: 'smtp.gmail.com',
+      port: 465, // Puerto SSL directo
+      secure: true, // true para puerto 465
       auth: {
         user: emailUser,
         pass: emailPassword,
       },
-      pool: true,
-      maxConnections: 5,
-      maxMessages: 100,
-      connectionTimeout: 60000, // 1 minuto
+      connectionTimeout: 30000, // 30 segundos
       greetingTimeout: 30000, // 30 segundos
-      socketTimeout: 60000, // 1 minuto
-      tls: {
-        rejectUnauthorized: false, // Permitir certificados auto-firmados
-      },
+      socketTimeout: 30000, // 30 segundos
     });
 
-    // Verificar conexión al iniciar
-    this.transporter.verify((error, success) => {
-      if (error) {
-        this.logger.error('Error verificando conexión SMTP:', error);
-      } else {
-        this.logger.log('Servidor SMTP listo para enviar correos');
-      }
-    });
+    // Verificar conexión al iniciar (no bloquea el inicio)
+    this.transporter.verify()
+      .then(() => this.logger.log('Servidor SMTP listo para enviar correos'))
+      .catch((error) => this.logger.warn('No se pudo verificar conexión SMTP:', error.message));
   }
 
   // Tu función para enviar correos
