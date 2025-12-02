@@ -18,7 +18,22 @@ async function bootstrap() {
       },
     }),
   );
-  app.enableCors();
+  const allowedOrigins = new Set([
+    'https://www.escobarconstrucciones.cl',
+    'https://www.nicolas-escobar.dev',
+  ]);
+
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
   const port = process.env.PORT ?? 8080;
   await app.listen(port, '0.0.0.0');
   logger.log(`Application is running on PORT: ${port}`);
